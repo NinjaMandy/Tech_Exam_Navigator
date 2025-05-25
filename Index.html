@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tech Navigator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        /* Define your custom CSS variables based on your desired theme */
+        :root {
+            --tn-primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --tn-bg-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            --tn-text-light: #e0e6ed;
+            --tn-text-muted: #a0aec0;
+            --tn-card-bg: rgba(255, 255, 255, 0.05);
+            --tn-border-color: rgba(255, 255, 255, 0.1);
+            --tn-focus-border: #667eea;
+            --tn-shadow-light: rgba(0, 0, 0, 0.3);
+            --tn-shadow-primary: rgba(102, 126, 234, 0.3);
+
+            /* Override Bootstrap's CSS variables for a consistent dark theme */
+            --bs-body-bg: #1a1a2e; /* From your bg-gradient middle */
+            --bs-body-color: var(--tn-text-light);
+            --bs-link-color: var(--tn-focus-border);
+            --bs-link-hover-color: #5a6fe0; /* Slightly lighter primary */
+            --bs-border-color: rgba(255, 255, 255, 0.15);
+            --bs-heading-color: var(--tn-text-light); /* Make headings lighter */
+            --bs-secondary-bg: var(--tn-card-bg); /* Use card bg for secondary bg if needed */
+            --bs-primary: #667eea; /* Align Bootstrap primary with your accent */
+            --bs-danger: #ef4444; /* Keep original Bootstrap danger */
+            --bs-info: #3b82f6; /* Keep original Bootstrap info */
+            --bs-success: #10b981; /* Keep original Bootstrap success */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--tn-bg-gradient); /* Keep custom gradient */
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        h1 {
+            background: var(--tn-primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Glass effect for cards, applying to Bootstrap's .card */
+        .card.glass-effect {
+            background: var(--tn-card-bg);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--tn-border-color);
+            box-shadow: 0 8px 32px var(--tn-shadow-light);
+        }
+
+        /* Custom styling for inputs to give them the desired look */
+        .form-control.api-input,
+        .form-control.search-input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: var(--tn-text-light);
+            transition: all 0.3s ease;
+        }
+
+        .form-control.api-input:focus,
+        .form-control.search-input:focus {
+            outline: none;
+            border-color: var(--tn-focus-border);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: rgba(255, 255, 255, 0.15);
+            color: var(--tn-text-light); /* Ensure text color remains light on focus */
+        }
+
+        .form-control.api-input::placeholder,
+        .form-control.search-input::placeholder {
+            color: #718096;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--tn-focus-border); /* Match your accent */
+            border-color: var(--tn-focus-border);
+        }
+
+        .form-check-input:focus {
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+
+
+        /* Custom buttons - use .btn and add .custom-btn to override */
+        .btn.custom-btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn.custom-btn.btn-primary {
+            background: var(--tn-primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px var(--tn-shadow-primary);
+        }
+
+        .btn.custom-btn.btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--tn-shadow-primary);
+        }
+
+        .btn.custom-btn.btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--tn-text-light);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn.custom-btn.btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn.custom-btn.btn-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .btn.custom-btn.btn-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Specific styling for the suggestion chips */
+        .suggestion-chip {
+            padding: 8px 16px;
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 20px;
+            color: var(--tn-text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .suggestion-chip:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: translateY(-1px);
+        }
+
+        /* Status and error messages */
+        .api-key-status {
+            font-size: 0.9rem;
+            color: #6ee7b7; /* Green for loaded */
+        }
+
+        .api-key-status.error {
+            color: #fca5a5; /* Red for error */
+        }
+
+        .loading-indicator, .error-message {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-message {
+            /* Bootstrap's alert-danger already handles most of this */
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        /* Opportunity Card styling (unique design) */
+        .opportunity-card {
+            background: var(--tn-card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--tn-border-color);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .opportunity-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        .opportunity-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--tn-text-light);
+        }
+
+        .opportunity-provider {
+            color: var(--tn-text-muted);
+            font-size: 14px;
+        }
+
+        .opportunity-type {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Type-specific background/colors for badges/tags */
+        .type-exam {
+            background: rgba(236, 72, 153, 0.2);
+            color: #f9a8d4;
+            border: 1px solid rgba(236, 72, 153, 0.3);
+        }
+
+        .type-course, .type-courseprogram {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .type-internship {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .type-other {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .opportunity-description {
+            color: #cbd5e0;
+            line-height: 1.6;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 3px solid rgba(102, 126, 234, 0.5);
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--tn-text-muted);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 3px;
+        }
+
+        .detail-value {
+            color: var(--tn-text-light);
+            font-size: 0.9rem;
+        }
+
+        .opportunity-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--tn-focus-border);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 10px 15px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .opportunity-link:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+
+        /* Responsive adjustments (already good with Bootstrap's flex/grid) */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .opportunity-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        /* Specific classes for showing/hiding with smooth transition */
+        .suggestions.hidden, .api-key-section.hidden {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            padding-top: 0 !important; /* Override Bootstrap padding */
+            padding-bottom: 0 !important;
+            margin-top: 0 !important; /* Override Bootstrap margin */
+            margin-bottom: 0 !important;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out, padding 0.5s ease-out, margin 0.5s ease-out;
+        }
+
+        .suggestions, .api-key-section {
+            max-height: 200px; /* Adjust as needed, sufficiently large */
+            opacity: 1;
+            transition: max-height 0.5s ease-in, opacity 0.5s ease-in, padding 0.5s ease-in, margin 0.5s ease-in;
+        }
+
+    </style>
+</head>
+<body data-bs-theme="dark"> <div class="container my-5">
+        <header class="text-center mb-5">
+            <h1 class="display-4 fw-bold">Tech Navigator</h1>
+            <p class="lead text-muted">Discover tech upskilling opportunities with AI-powered or manual search.</p>
+        </header>
+
+        <div class="card p-4 mb-4 glass-effect">
+            <div class="d-flex align-items-center justify-content-center mb-4 gap-3">
+                <span>AI-Powered Search</span>
+                <div class="form-check form-switch">
+                    <input class="form-check-input" type="checkbox" id="aiModeToggle" checked>
+                    <label class="form-check-label" for="aiModeToggle" aria-label="Toggle AI-Powered Search"></label>
+                </div>
+                <span>Manual Google Search</span>
+            </div>
+
+            <div class="api-key-section" id="apiKeySection">
+                <div class="mb-3">
+                    <label for="llmApiKey" class="form-label small text-muted text-uppercase fw-bold mb-1">LLM API Key</label>
+                    <input type="text" id="llmApiKey" class="form-control api-input" placeholder="Enter LLM API Key">
+                </div>
+                <div class="mb-3">
+                    <label for="llmApiEndpoint" class="form-label small text-muted text-uppercase fw-bold mb-1">LLM API Endpoint</label>
+                    <input type="text" id="llmApiEndpoint" class="form-control api-input" placeholder="e.g., https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent">
+                </div>
+                <div class="d-flex gap-2">
+                    <button id="saveApiKey" class="btn btn-primary custom-btn">Save Key</button>
+                    <button id="clearApiKey" class="btn btn-danger custom-btn">Clear Key</button>
+                </div>
+                <div id="apiKeyStatus" class="api-key-status mt-2 small"></div>
+                <div class="api-key-note mt-2 text-info small">
+                    Your API key is stored locally in your browser for convenience.
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-4 glass-effect">
+            <div class="search-input-group d-flex gap-3 mb-3">
+                <input type="text" id="searchQuery" class="form-control search-input" placeholder="e.g., Python internships 2025, Master's in AI online">
+                <button id="exploreButton" class="btn btn-primary custom-btn flex-shrink-0">Explore</button>
+            </div>
+
+            <div id="suggestionsSection" class="suggestions d-flex flex-wrap gap-2">
+                <span class="badge suggestion-chip" data-query="ML Courses">ML Courses</span>
+                <span class="badge suggestion-chip" data-query="DS Internships">DS Internships</span>
+                <span class="badge suggestion-chip" data-query="Cybersecurity Certifications">Cybersecurity Certifications</span>
+                <span class="badge suggestion-chip" data-query="Web Dev Bootcamps">Web Dev Bootcamps</span>
+                <span class="badge suggestion-chip" data-query="Cloud Computing Exams">Cloud Computing Exams</span>
+            </div>
+        </div>
+
+        <div id="loadingIndicator" class="loading-indicator text-center py-4" style="display: none;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2 text-muted">Searching...</p>
+        </div>
+        <div id="errorMessage" class="alert alert-danger error-message mt-3" role="alert" style="display: none;"></div>
+
+        <div id="resultsContainer" class="results-container mt-4">
+            </div>
+
+        <div class="text-center mt-4">
+            <button id="loadMoreButton" class="btn btn-secondary custom-btn load-more-button" style="display: none;">Load More Opportunities</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+<script>
+    const aiModeToggle = document.getElementById('aiModeToggle');
+    const llmApiKeyInput = document.getElementById('llmApiKey');
+    const llmApiEndpointInput = document.getElementById('llmApiEndpoint');
+    const saveApiKeyButton = document.getElementById('saveApiKey');
+    const clearApiKeyButton = document.getElementById('clearApiKey');
+    const apiKeyStatus = document.getElementById('apiKeyStatus');
+    const apiKeySection = document.getElementById('apiKeySection');
+
+    const searchQueryInput = document.getElementById('searchQuery');
+    const exploreButton = document.getElementById('exploreButton');
+    const suggestionsSection = document.getElementById('suggestionsSection');
+    const suggestionChips = document.querySelectorAll('.suggestion-chip');
+
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const errorMessage = document.getElementById('errorMessage');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const loadMoreButton = document.getElementById('loadMoreButton');
+
+    let currentResults = [];
+    let displayedResultsCount = 0;
+    const resultsPerPage = 5;
+
+    // --- API Key Management ---
+    const LLM_API_KEY_LS_KEY = 'llmApiKey';
+    const LLM_API_ENDPOINT_LS_KEY = 'llmApiEndpoint';
+    const AI_MODE_LS_KEY = 'aiModeEnabled';
+
+    function loadApiKey() {
+        const storedKey = localStorage.getItem(LLM_API_KEY_LS_KEY);
+        const storedEndpoint = localStorage.getItem(LLM_API_ENDPOINT_LS_KEY);
+
+        if (storedKey) {
+            llmApiKeyInput.value = 'API Key loaded (******)';
+            llmApiKeyInput.disabled = true;
+            apiKeyStatus.textContent = 'API Key loaded successfully!';
+            apiKeyStatus.classList.remove('error');
+            clearApiKeyButton.style.display = 'inline-block';
+        } else {
+            llmApiKeyInput.value = '';
+            llmApiKeyInput.disabled = false;
+            apiKeyStatus.textContent = 'No API Key loaded. AI Mode requires a key.';
+            apiKeyStatus.classList.add('error');
+            clearApiKeyButton.style.display = 'none';
+        }
+
+        if (storedEndpoint) {
+            llmApiEndpointInput.value = storedEndpoint;
+        } else {
+            // Default endpoint for Gemini 1.0 Pro
+            llmApiEndpointInput.value = '[https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent](https://generativelanguage.googleapis.com/v1beta/models/gemini-1.0-pro:generateContent)';
+        }
+    }
+
+    function saveApiKey() {
+        const key = llmApiKeyInput.value.trim();
+        const endpoint = llmApiEndpointInput.value.trim();
+
+        if (key && key !== 'API Key loaded (******)') {
+            localStorage.setItem(LLM_API_KEY_LS_KEY, key);
+            localStorage.setItem(LLM_API_ENDPOINT_LS_KEY, endpoint);
+            loadApiKey(); // Reload to update status and disable input
+            showError('API Key and Endpoint saved!', 'success');
+        } else if (key === 'API Key loaded (******)') {
+            showError('API Key is already loaded.', 'info');
+        } else {
+            showError('Please enter a valid API Key and Endpoint to save.', 'error');
+        }
+    }
+
+    function clearApiKey() {
+        localStorage.removeItem(LLM_API_KEY_LS_KEY);
+        localStorage.removeItem(LLM_API_ENDPOINT_LS_KEY);
+        loadApiKey(); // Reload to clear and enable input
+        showError('API Key and Endpoint cleared!', 'info');
+    }
+
+    // --- UI State Management ---
+    function updateUIMode() {
+        const isAiMode = aiModeToggle.checked;
+        localStorage.setItem(AI_MODE_LS_KEY, isAiMode);
+
+        if (isAiMode) {
+            apiKeySection.classList.remove('hidden');
+            suggestionsSection.classList.remove('hidden');
+            loadApiKey(); // Ensure API key status is updated when switching to AI mode
+        } else {
+            apiKeySection.classList.add('hidden');
+            suggestionsSection.classList.add('hidden');
+            llmApiKeyInput.disabled = false; // Enable input in manual mode regardless of key
+            apiKeyStatus.textContent = ''; // Clear status message
+        }
+        resetResultsUI();
+    }
+
+    function showLoading(show) {
+        loadingIndicator.style.display = show ? 'block' : 'none';
+        loadMoreButton.style.display = 'none'; // Hide load more during loading
+    }
+
+    function showError(message, type = 'error') {
+        errorMessage.textContent = message;
+        errorMessage.classList.remove('alert-danger', 'alert-success', 'alert-info');
+        errorMessage.classList.add(`alert-${type}`);
+        errorMessage.style.display = 'block';
+    }
+
+    function hideError() {
+        errorMessage.style.display = 'none';
+        errorMessage.textContent = '';
+    }
+
+    function resetResultsUI() {
+        resultsContainer.innerHTML = '';
+        currentResults = [];
+        displayedResultsCount = 0;
+        loadMoreButton.style.display = 'none';
+        hideError();
+        showLoading(false);
+    }
+
+    // --- Search Logic ---
+    async function performSearch() {
+        hideError();
+        resetResultsUI(); // Clear previous results
+        showLoading(true);
+
+        const query = searchQueryInput.value.trim();
+        if (!query) {
+            showError('Please enter a search query.', 'warning');
+            showLoading(false);
+            return;
+        }
+
+        const isAiMode = aiModeToggle.checked;
+
+        if (isAiMode) {
+            const apiKey = localStorage.getItem(LLM_API_KEY_LS_KEY);
+            const apiEndpoint = localStorage.getItem(LLM_API_ENDPOINT_LS_KEY);
+
+            if (!apiKey || !apiEndpoint || llmApiKeyInput.disabled === false) { // Check if key is truly loaded and input is disabled
+                showError('API Key not loaded. Please provide and save your LLM API Key and Endpoint to use AI-Powered Search.', 'error');
+                showLoading(false);
+                return;
+            }
+
+            try {
+                const results = await callLlmApi(query, apiKey, apiEndpoint);
+                currentResults = results;
+                displayResults();
+            } catch (error) {
+                console.error('AI Search Error:', error);
+                showError(`AI Search failed: ${error.message}. Please check your API key, endpoint, and network connection.`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        } else {
+            performManualGoogleSearch(query);
+            showLoading(false);
+        }
+    }
+
+    function performManualGoogleSearch(query) {
+        // Construct a sophisticated Google search URL
+        // Using "allintext" to find exact phrases within the text of pages.
+        // Using "site" to focus on educational/career-related domains.
+        // Using "inurl" to find specific keywords in the URL (e.g., "courses", "internship").
+        // Using "intitle" to find keywords in the page title.
+        // Adding current year for recency.
+        const encodedQuery = encodeURIComponent(query);
+        const searchTerms = [
+            `"${encodedQuery}"`,
+            `("certification" OR "course" OR "program" OR "internship" OR "exam")`,
+            `("open" OR "starting soon" OR "application dates")`,
+            `(site:coursera.org OR site:edx.org OR site:udemy.com OR site:linkedin.com/jobs OR site:indeed.com OR site:glassdoor.com OR site:naukri.com OR site:monsterindia.com OR site:upgrad.com OR site:greatlearning.in OR site:simplilearn.com OR site:mygreatlearning.com OR site:mastersportal.com OR site:studyportals.com OR site:careers.google.com OR site:careers.microsoft.com OR site:careers.amazon.com OR site:careers.facebook.com OR site:careers.apple.com OR site:careers.netflix.com OR site:careerbuilder.com OR site:dice.com)`,
+            `(intitle:"${query}" OR inurl:"${query.split(' ')[0]}")`, // Use first word for a simpler inurl match
+            `"${new Date().getFullYear()}"` // Current year for recency
+        ];
+
+        // Example: "Python internships 2025"
+        // Refined: "Python internships 2025" ("certification" OR "course" OR "program" OR "internship" OR "exam") ("open" OR "starting soon" OR "application dates") (site:coursera.org OR site:edx.org ...) (intitle:"Python internships 25" OR inurl:"Python") "2025"
+
+        const googleSearchUrl = `https://www.google.com/search?q=${searchTerms.join(' ')}`;
+        window.open(googleSearchUrl, '_blank');
+        resultsContainer.innerHTML = '<p class="text-muted text-center">Opening Google Search in a new tab...</p>';
+    }
+
+    async function callLlmApi(query, apiKey, apiEndpoint) {
+        // Corrected prompt with escaped backticks for ```json
+        const prompt = `
+            You are a specialized assistant for finding tech upskilling opportunities, including Certification Exams, Courses & Programs, and Internships.
+            Your task is to search for "${query}" and extract relevant opportunities.
+            Strictly focus on opportunities that are currently open, starting soon, or have known future dates. Do not include expired or past opportunities.
+
+            The response MUST be a JSON array of opportunity objects. Each object must strictly adhere to the following structure:
+
+            [
+                {
+                    "type": "Exam" | "Course/Program" | "Internship" | "Other",
+                    "name": "string",
+                    "provider": "string",
+                    "link": "string (valid URL to the opportunity)",
+                    "description": "string (concise summary of the opportunity)",
+                    // Conditional fields based on 'type':
+                    // If type is "Exam":
+                    "dates": "string (e.g., 'Various dates', 'June 2025', 'Self-paced')",
+                    "cost": "string (e.g., '$200', 'Free', 'N/A')",
+                    "prerequisites": "string (e.g., 'Basic Python knowledge', 'N/A')",
+                    // If type is "Course/Program":
+                    "format": "string (e.g., 'Online', 'In-person', 'Hybrid')",
+                    "duration": "string (e.g., '8 weeks', 'Self-paced', '6 months')",
+                    "certificate": "string (e.g., 'Yes', 'No', 'N/A')",
+                    "applicationDates": "string (e.g., 'Rolling admissions', 'Apply by May 30, 2025', 'N/A')",
+                    "cost": "string (e.g., '$1500', 'Free', 'N/A')",
+                    "prerequisites": "string (e.g., 'Intermediate JavaScript', 'None', 'N/A')",
+                    // If type is "Internship":
+                    "company": "string",
+                    "location": "string (e.g., 'Remote', 'London, UK', 'Multiple locations')",
+                    "duration": "string (e.g., '3 months', 'Summer 2025', 'N/A')",
+                    "applicationDates": "string (e.g., 'Applications open until June 15, 2025', 'N/A')",
+                    "compensation": "string (e.g., 'Paid', 'Unpaid', 'Competitive salary', 'N/A')",
+                    "eligibility": "string (e.g., 'Currently enrolled student', 'Graduates within 1 year', 'N/A')",
+                    "requiredSkills": "string (comma-separated, e.g., 'Python, Machine Learning, SQL', 'N/A')",
+                    // If type is "Other":
+                    "notes": "string (any additional relevant information)"
+                }
+            ]
+
+            Use "N/A" for any missing or inapplicable fields.
+            Return ONLY the JSON array, with no surrounding text, markdown formatting (like \`\`\`json), or explanations. Ensure the JSON is valid.
+        `;
+
+        const requestBody = {
+            contents: [{
+                parts: [{
+                    text: prompt
+                }]
+            }],
+            safetySettings: [
+                {
+                    category: "HARM_CATEGORY_HARASSMENT",
+                    threshold: "BLOCK_NONE"
+                },
+                {
+                    category: "HARM_CATEGORY_HATE_SPEECH",
+                    threshold: "BLOCK_NONE"
+                },
+                {
+                    category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    threshold: "BLOCK_NONE"
+                },
+                {
+                    category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    threshold: "BLOCK_NONE"
+                },
+            ]
+        };
+
+        const response = await fetch(`${apiEndpoint}?key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(`API error: ${response.status} - ${errorData.error ? errorData.error.message : response.statusText}`);
+        }
+
+        const data = await response.json();
+        let textResponse = data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0] ? data.candidates[0].content.parts[0].text : '';
+
+        // Attempt to clean the response to ensure it's pure JSON
+        const jsonStartIndex = textResponse.indexOf('[');
+        const jsonEndIndex = textResponse.lastIndexOf(']');
+
+        if (jsonStartIndex !== -1 && jsonEndIndex !== -1 && jsonEndIndex > jsonStartIndex) {
+            textResponse = textResponse.substring(jsonStartIndex, jsonEndIndex + 1);
+        } else {
+             // Fallback: try to strip common markdown code blocks
+            textResponse = textResponse.replace(/^```json\s*|```\s*$/g, '').trim();
+        }
+
+        try {
+            const parsedResults = JSON.parse(textResponse);
+            if (!Array.isArray(parsedResults)) {
+                throw new Error('LLM response is not a JSON array.');
+            }
+            return parsedResults;
+        } catch (e) {
+            console.error('Failed to parse LLM JSON response:', e);
+            console.warn('Raw LLM response:', textResponse);
+            throw new Error(`Invalid JSON response from LLM. It might have included extra text or malformed JSON. Raw response: ${textResponse.substring(0, 200)}...`);
+        }
+    }
+
+    function displayResults() {
+        if (currentResults.length === 0) {
+            resultsContainer.innerHTML = '<p class="text-muted text-center">No opportunities found for your query. Try a different search!</p>';
+            return;
+        }
+
+        const startIndex = displayedResultsCount;
+        const endIndex = Math.min(displayedResultsCount + resultsPerPage, currentResults.length);
+        const fragment = document.createDocumentFragment();
+
+        for (let i = startIndex; i < endIndex; i++) {
+            const opportunity = currentResults[i];
+            const card = document.createElement('div');
+            card.classList.add('opportunity-card');
+
+            let typeClass = '';
+            switch (opportunity.type) {
+                case 'Exam': typeClass = 'type-exam'; break;
+                case 'Course/Program': typeClass = 'type-courseprogram'; break;
+                case 'Internship': typeClass = 'type-internship'; break;
+                default: typeClass = 'type-other'; break;
+            }
+
+            let detailsHtml = '';
+            if (opportunity.type === 'Exam') {
+                detailsHtml = `
+                    <div class="detail-item"><div class="detail-label">Dates</div><div class="detail-value">${opportunity.dates || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Cost</div><div class="detail-value">${opportunity.cost || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Prerequisites</div><div class="detail-value">${opportunity.prerequisites || 'N/A'}</div></div>
+                `;
+            } else if (opportunity.type === 'Course/Program') {
+                detailsHtml = `
+                    <div class="detail-item"><div class="detail-label">Format</div><div class="detail-value">${opportunity.format || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Duration</div><div class="detail-value">${opportunity.duration || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Certificate</div><div class="detail-value">${opportunity.certificate || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Application Dates</div><div class="detail-value">${opportunity.applicationDates || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Cost</div><div class="detail-value">${opportunity.cost || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Prerequisites</div><div class="detail-value">${opportunity.prerequisites || 'N/A'}</div></div>
+                `;
+            } else if (opportunity.type === 'Internship') {
+                detailsHtml = `
+                    <div class="detail-item"><div class="detail-label">Company</div><div class="detail-value">${opportunity.company || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Location</div><div class="detail-value">${opportunity.location || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Duration</div><div class="detail-value">${opportunity.duration || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Application Dates</div><div class="detail-value">${opportunity.applicationDates || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Compensation</div><div class="detail-value">${opportunity.compensation || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Eligibility</div><div class="detail-value">${opportunity.eligibility || 'N/A'}</div></div>
+                    <div class="detail-item"><div class="detail-label">Required Skills</div><div class="detail-value">${opportunity.requiredSkills || 'N/A'}</div></div>
+                `;
+            } else if (opportunity.type === 'Other') {
+                detailsHtml = `
+                    <div class="detail-item"><div class="detail-label">Notes</div><div class="detail-value">${opportunity.notes || 'N/A'}</div></div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div class="opportunity-header d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
+                    <div>
+                        <h5 class="opportunity-title mb-1">${opportunity.name || 'N/A'}</h5>
+                        <p class="opportunity-provider mb-0">${opportunity.provider || 'N/A'}</p>
+                    </div>
+                    <span class="opportunity-type ${typeClass}">${opportunity.type || 'Other'}</span>
+                </div>
+                <p class="opportunity-description">${opportunity.description || 'No description provided.'}</p>
+                <div class="opportunity-details d-grid gap-3 mb-3">
+                    ${detailsHtml}
+                </div>
+                ${opportunity.link && opportunity.link !== 'N/A' ? `<a href="${opportunity.link}" target="_blank" rel="noopener noreferrer" class="opportunity-link">Learn More <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+                    <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+                </svg></a>` : ''}
+            `;
+            fragment.appendChild(card);
+        }
+
+        resultsContainer.appendChild(fragment);
+        displayedResultsCount = endIndex;
+
+        if (displayedResultsCount < currentResults.length) {
+            loadMoreButton.style.display = 'block';
+        } else {
+            loadMoreButton.style.display = 'none';
+        }
+    }
+
+    // --- Event Listeners ---
+    aiModeToggle.addEventListener('change', updateUIMode);
+    saveApiKeyButton.addEventListener('click', saveApiKey);
+    clearApiKeyButton.addEventListener('click', clearApiKey);
+    exploreButton.addEventListener('click', performSearch);
+    loadMoreButton.addEventListener('click', displayResults);
+
+    searchQueryInput.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            performSearch();
+        }
+    });
+
+    suggestionChips.forEach(chip => {
+        chip.addEventListener('click', function() {
+            searchQueryInput.value = this.dataset.query;
+            performSearch();
+        });
+    });
+
+    // Initial setup
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load AI mode preference
+        const storedAiMode = localStorage.getItem(AI_MODE_LS_KEY);
+        if (storedAiMode !== null) {
+            aiModeToggle.checked = storedAiMode === 'true';
+        }
+        updateUIMode();
+    });
+</script>
+    </body>
+</html>
